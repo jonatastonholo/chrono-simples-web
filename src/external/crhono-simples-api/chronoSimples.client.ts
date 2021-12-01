@@ -37,7 +37,7 @@ async function PUT(uri : string, body : any) : Promise<any> {
   });
 }
 
-async function PATCH(uri : string, body : any) : Promise<any> {
+async function PATCH(uri : string, body? : any) : Promise<any> {
   return await httpClient.patch(uri, body, {
     headers: {
       'x-api-key':  API_KEY,
@@ -56,10 +56,10 @@ async function DELETE(uri : string) : Promise<any> {
 }
 
 export default {
+  BASE_URL,
   GET,
   POST,
   DELETE,
   PUT,
   PATCH
-
 }

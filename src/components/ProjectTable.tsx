@@ -159,7 +159,7 @@ export default function ProjectTable({ projects, onDelete, onEdit }: props) {
       <TablePagination
         labelRowsPerPage="Projetos por página:"
         className={classes.tableFooter}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rowsPerPageOptions={[1, 5, 10, 25, 50]}
         component="div"
         count={projects.length}
         rowsPerPage={rowsPerPage}

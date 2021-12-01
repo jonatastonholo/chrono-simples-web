@@ -6,7 +6,7 @@ const BASE_URI = "/chrono-simples/v1/session";
 
 export async function signIn(email: string, password: string): Promise<IUser | undefined> {
   try {
-    const response = await chronoSimplesClient.POST(BASE_URI, { email, senha: password });
+    const response = await chronoSimplesClient.POST(BASE_URI, { email, password: password });
     if (response.status === 200) {
       const { nome: name, email } = response.data;
       return { name, email };

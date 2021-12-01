@@ -4,6 +4,7 @@ import { Card, makeStyles, Typography } from "@material-ui/core";
 import { theme } from "../Styles";
 import Box from "@material-ui/core/Box";
 import { UserMenu } from "./UserMenu";
+import {StopwatchMenu} from "./StopwatchMenu";
 
 type Props = {
   title: string;
@@ -37,6 +38,9 @@ export function PageHeader({ title }: Props) {
         <Box className={classes.content}>
           <Box flex="1" padding="1rem" marginLeft="12px">
             {title}
+          </Box>
+          <Box>
+            <StopwatchMenu />
           </Box>
           <Box>
             <UserMenu />
