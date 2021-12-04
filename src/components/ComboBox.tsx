@@ -1,5 +1,4 @@
 import * as React from 'react';
-import {useEffect} from 'react';
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormHelperText from '@mui/material/FormHelperText';
@@ -12,21 +11,14 @@ type props = {
   helperText?: string;
   onSelect: (value: any) => void;
   values: IComboBoxValue[];
-  defaultValue?: IComboBoxValue | undefined;
+  selectedId?: string | undefined;
+  disabled: boolean;
 };
 
-export default function ComboBox({label, values, helperText, onSelect, defaultValue} : props) {
-  const [selected, setSelected] = React.useState("");
-
-  useEffect(() => {
-    (() => {
-      if (!!defaultValue) setSelected(defaultValue.objectId)
-    })();
-  }, [defaultValue]);
+export default function ComboBox({label, values, helperText, onSelect, selectedId, disabled = false} : props) {
 
   const handleChange = (event: SelectChangeEvent) => {
     const value = event.target.value;
-    setSelected(value);
     onSelect(value);
   };
 
@@ -37,10 +29,10 @@ export default function ComboBox({label, values, helperText, onSelect, defaultVa
         <Select
           labelId="select-helper-label"
           id="simple-select-helper"
-          value={selected}
+          value={selectedId}
           label={label}
           onChange={handleChange}
-          defaultValue={defaultValue?.objectValue}
+          disabled={disabled}
         >
           {values.map((value, index) => {
             return (

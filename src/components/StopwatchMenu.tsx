@@ -34,22 +34,23 @@ export function StopwatchMenu() {
   let eventSource = useRef<EventSource | undefined>(undefined);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [projects, setProjects] = useState<IProject[] | []>([]);
-  const [projectsComboboxValue, setProjectsComboboxValue] = useState<IComboBoxValue[] | []>([]);
+  const [projectsComboboxValues, setProjectsComboboxValues] = useState<IComboBoxValue[] | []>([]);
   const [selectedProject, setSelectedProject] = useState<IProject | undefined>(undefined);
-  const [stopWatchValue, setStopWatchValue] = useState<string | undefined>();
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
+  const [stopwatch, setStopwatch] = useState<IStopwatch | undefined>();
+  const [stopwatchFormated, setStopwatchFormated] = useState<string | undefined>();
   const [listening, setListening] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const projectsFound = (await projectService.findAll()) as Array<IProject>;
-      const comboboxValue = projectsFound
+      const comboBoxValues =
+        projects
         .map(project => {
           return  {objectId: project.id, objectValue: project.name} as IComboBoxValue;
-        })
-      setProjectsComboboxValue(comboboxValue);
-      setProjects(projectsFound);
+        });
+      setProjectsComboboxValues(comboBoxValues);
     })();
-  }, []);
+  }, [projects]);
 
   // let eventSource: EventSource | undefined;
   // eventSource = undefined;
@@ -59,15 +60,27 @@ export function StopwatchMenu() {
         eventSource.current?.close();
         console.log("event closed")
     }
-
   }, [])
+
+  useEffect(() => {
+    setSelectedProject(projects?.find(project => project.id === selectedProjectId))
+  }, [selectedProjectId])
+
+  useEffect(() => {
+    setSelectedProjectId(stopwatch?.projectId)
+  }, [stopwatch])
+
+  useEffect(() => {
+    setStopwatchFormated(formatStopwatch())
+  }, [stopwatch])
 
   const listenStopWatch = () => {
     if (!listening) {
       eventSource.current = stopwatchService.listen();
       eventSource.current.onmessage = (event) => {
         const stopwatch = JSON.parse(event.data) as IStopwatch;
-        setStopWatchValue(formatStopwatch(stopwatch));
+        setStopwatch(stopwatch);
+
       }
       eventSource.current.onerror = (err) => {
         console.error("EventSource failed:", err);
@@ -78,12 +91,15 @@ export function StopwatchMenu() {
     }
   }
 
-  function formatStopwatch(stopwatch: IStopwatch) {
+  const formatStopwatch = () : string => {
+    if(!stopwatch) return "";
     return `${stopwatch.days.toString().padStart(2,'0')}:${stopwatch.hours.toString().padStart(2,'0')}:${stopwatch.minutes.toString().padStart(2,'0')}:${stopwatch.seconds.toString().padStart(2,'0')}`;
   }
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
+    const projectsFound = (await projectService.findAll()) as Array<IProject>;
+    setProjects(projectsFound);
   };
 
   const handleClose = () => {
@@ -91,29 +107,23 @@ export function StopwatchMenu() {
   };
 
   async function handleProjectSelect(projectId: string) {
-    console.log(projectId);
     const project = projects.find(project => project.id === projectId);
-    console.log(project);
     setSelectedProject(project)
-    // onStop(projectId);
   }
 
   async function handleButtonClick(running: boolean) {
     if (running) {
-      console.log("Stopping stopwatch");
       await stopwatchService.stop();
       setListening(false);
-      setStopWatchValue(undefined);
+      setStopwatch(undefined);
       eventSource.current?.close();
     } else {
       if(!!selectedProject && !listening) {
-        console.log("Starting stopwatch");
         await stopwatchService.start(selectedProject.id);
         listenStopWatch();
       }
     }
   }
-
 
   const stopwatchColor = !listening ? lightBlue["800"].toString() : red[500].toString();
 
@@ -137,9 +147,12 @@ export function StopwatchMenu() {
           </Avatar>
 
           <StopwatchButton running={listening} onClick={handleButtonClick}/>
-          {listening ? <Box>{stopWatchValue}</Box> : <></>}
-
-          <ComboBox label={"Projeto"} values={projectsComboboxValue} defaultValue={projectsComboboxValue[0]} onSelect={handleProjectSelect}/>
+          {listening ? <Box>{stopwatchFormated}</Box> : <></>}
+          {
+            anchorEl
+              ? <ComboBox disabled={listening} label={"Projeto"} values={projectsComboboxValues} selectedId={selectedProjectId} onSelect={handleProjectSelect}/>
+              : <></>
+          }
         </div>
       </Menu>
     </div>
