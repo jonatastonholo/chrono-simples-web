@@ -58,6 +58,7 @@
     ]
   },
   "devDependencies": {
+    "notistack": "^2.0.3",
     "prettier": "^2.5.0",
     "yarn-upgrade-all": "^0.5.4"
   }

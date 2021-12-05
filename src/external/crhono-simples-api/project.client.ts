@@ -1,30 +1,62 @@
 import {IProject} from "../../domain/IProject";
-import {ApiError} from "../../error/ApiError";
 import chronoSimplesClient from './chronoSimples.client'
+import {IApiError} from "../../domain/IApiError";
+import {ApiError} from "../../error/ApiError";
+
 const BASE_URI = "/chrono-simples/v1/projects";
 
 async function findAll() : Promise<IProject[] | undefined> {
 
-  const response = await chronoSimplesClient.GET(BASE_URI);
-
-  if (response.status === 200) {
+  try {
+    const response = await chronoSimplesClient.GET(BASE_URI);
     const { data: projects } : { data: IProject[] } = response;
     return projects;
-  } else {
-    throw new ApiError(response.status, "Error on find all projects", response);
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
   }
 }
 
-async function remove(projectId: string) : Promise<void> {
+async function remove(projectId: string) : Promise<IProject> {
 
-  const response = await chronoSimplesClient.DELETE(`${BASE_URI}/${projectId}`);
+  try {
+    const response = await chronoSimplesClient.DELETE(`${BASE_URI}/${projectId}`);
+    const { data: project } : { data: IProject } = response;
+    return project;
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
+  }
+}
 
-  if (response.status !== 200) {
-    throw new ApiError(response.status, "Error on delete project", response);
+async function update(project: IProject) : Promise<IProject> {
+
+  try {
+    const response = await chronoSimplesClient.PUT(`${BASE_URI}/${project.id}`, project);
+    const { data } : { data: IProject } = response;
+    return data;
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
+  }
+
+}
+
+async function create(project: IProject) : Promise<IProject> {
+
+  try {
+    const response = await chronoSimplesClient.POST(`${BASE_URI}`, project);
+    const { data } : { data: IProject } = response;
+    return data;
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
   }
 }
 
 export default {
   findAll,
-  remove
+  remove,
+  update,
+  create
 }

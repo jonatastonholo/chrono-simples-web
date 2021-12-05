@@ -3,6 +3,4 @@ export interface IProject {
   name: string;
   hourValue: number;
   currencyCode: string;
-  createdAt: string;
-  updatedAt: string;
 }
