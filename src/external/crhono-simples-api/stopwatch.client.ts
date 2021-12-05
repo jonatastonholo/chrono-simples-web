@@ -1,34 +1,42 @@
 import {ApiError} from "../../error/ApiError";
 import chronoSimplesClient from './chronoSimples.client'
 import {IStopwatch} from "../../domain/IStopwatch";
+import {IApiError} from "../../domain/IApiError";
 
 const BASE_URI = "/chrono-simples/v1/stopwatches";
 
 function listen() : EventSource {
-
-  return new EventSource(`${chronoSimplesClient.BASE_URL}${BASE_URI}/listen`)
+  try {
+    return new EventSource(`${chronoSimplesClient.BASE_URL}${BASE_URI}/listen`)
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
+  }
 }
 
 async function start(projectId: string) : Promise<IStopwatch | undefined> {
 
   const response = await chronoSimplesClient.PATCH(`${BASE_URI}/start`, {projectId});
 
-  if (response.status === 201) {
+  try {
     const { data: stopwatch } : { data: IStopwatch } = response;
     return stopwatch;
-  } else {
-    throw new ApiError(response.status, "Error on listen stopwatch", response);
+
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
   }
 }
 async function stop() : Promise<IStopwatch | undefined> {
 
   const response = await chronoSimplesClient.PATCH(`${BASE_URI}/stop`);
 
-  if (response.status === 200) {
+  try {
     const { data: stopwatch } : { data: IStopwatch } = response;
     return stopwatch;
-  } else {
-    throw new ApiError(response.status, "Error on listen stopwatch", response);
+  } catch (err: any) {
+    const { data } : { data: IApiError } = err.response;
+    throw new ApiError(data.statusCode, data.message, err);
   }
 }
 

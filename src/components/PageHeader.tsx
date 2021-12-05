@@ -1,9 +1,9 @@
 // @flow
 import * as React from "react";
-import { Card, makeStyles, Typography } from "@material-ui/core";
-import { theme } from "../Styles";
+import {Card, makeStyles, Typography} from "@material-ui/core";
+import {theme} from "../Styles";
 import Box from "@material-ui/core/Box";
-import { UserMenu } from "./UserMenu";
+import {UserMenu} from "./UserMenu";
 import {StopwatchMenu} from "./StopwatchMenu";
 
 type Props = {
@@ -36,7 +36,7 @@ export function PageHeader({ title }: Props) {
     <Card className={classes.header}>
       <Typography variant="h5" component="h2">
         <Box className={classes.content}>
-          <Box flex="1" padding="1rem" marginLeft="12px">
+          <Box flex="1" padding="1rem" marginLeft="5.35rem">
             {title}
           </Box>
           <Box>
