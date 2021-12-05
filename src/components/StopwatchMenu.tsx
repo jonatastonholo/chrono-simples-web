@@ -38,7 +38,7 @@ export function StopwatchMenu() {
   const [selectedProject, setSelectedProject] = useState<IProject | undefined>(undefined);
   const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(undefined);
   const [stopwatch, setStopwatch] = useState<IStopwatch | undefined>();
-  const [stopwatchFormated, setStopwatchFormated] = useState<string | undefined>();
+  const [stopwatchFormatted, setStopwatchFormatted] = useState<string | undefined>();
   const [listening, setListening] = useState(false);
 
   useEffect(() => {
@@ -67,11 +67,11 @@ export function StopwatchMenu() {
   }, [selectedProjectId])
 
   useEffect(() => {
-    setSelectedProjectId(stopwatch?.projectId)
+    if(stopwatch) setSelectedProjectId(stopwatch?.projectId)
   }, [stopwatch])
 
   useEffect(() => {
-    setStopwatchFormated(formatStopwatch())
+    if(stopwatch) setStopwatchFormatted(formatStopwatch())
   }, [stopwatch])
 
   const listenStopWatch = () => {
@@ -80,7 +80,6 @@ export function StopwatchMenu() {
       eventSource.current.onmessage = (event) => {
         const stopwatch = JSON.parse(event.data) as IStopwatch;
         setStopwatch(stopwatch);
-
       }
       eventSource.current.onerror = (err) => {
         console.error("EventSource failed:", err);
@@ -116,6 +115,7 @@ export function StopwatchMenu() {
       await stopwatchService.stop();
       setListening(false);
       setStopwatch(undefined);
+      setStopwatchFormatted("");
       eventSource.current?.close();
     } else {
       if(!!selectedProject && !listening) {
@@ -146,8 +146,8 @@ export function StopwatchMenu() {
             <Icon style={{color: stopwatchColor}}>timer</Icon>
           </Avatar>
 
-          <StopwatchButton running={listening} onClick={handleButtonClick}/>
-          {listening ? <Box>{stopwatchFormated}</Box> : <></>}
+          <StopwatchButton running={listening} disabled={!selectedProject} onClick={handleButtonClick}/>
+          {listening ? <Box>{stopwatchFormatted}</Box> : <></>}
           {
             anchorEl
               ? <ComboBox disabled={listening} label={"Projeto"} values={projectsComboboxValues} selectedId={selectedProjectId} onSelect={handleProjectSelect}/>

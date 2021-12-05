@@ -8,6 +8,7 @@ export class ApiError extends Error {
     this._status = status;
     this._message = message;
     this._response = response;
+    console.log(message)
   }
 
   get status(): number {

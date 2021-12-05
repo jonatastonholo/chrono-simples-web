@@ -7,9 +7,10 @@ import {lightBlue, red} from "@mui/material/colors";
 
 type props = {
   running?: boolean;
+  disabled: boolean;
   onClick: (running: boolean) => void
 }
-export function StopwatchButton({running = false, onClick} : props) {
+export function StopwatchButton({running = false, disabled = true, onClick} : props) {
   const stopwatchColor = running
     ? red[500].toString()
     : lightBlue["800"].toString();
@@ -25,7 +26,7 @@ export function StopwatchButton({running = false, onClick} : props) {
   return (
     <Box>
       <Stack direction="row" spacing={1}>
-        <IconButton style={{color: stopwatchColor}} aria-label="start stopwatch" onClick={handleClick}>
+        <IconButton disabled={disabled} style={{color: stopwatchColor}} aria-label="start stopwatch" onClick={handleClick}>
           {icon}
         </IconButton>
       </Stack>
