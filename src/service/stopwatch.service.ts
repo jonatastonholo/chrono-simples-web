@@ -1,4 +1,4 @@
-import client from "../external/crhono-simples-api/stopwatch.client"
+import client from "../clients/crhono-simples-api/stopwatch.client"
 import {IStopwatch} from "../domain/IStopwatch";
 
 

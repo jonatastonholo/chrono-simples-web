@@ -1,5 +1,5 @@
 import {IPeriod} from "../domain/IPeriod";
-import client from "../external/crhono-simples-api/period.client"
+import client from "../clients/crhono-simples-api/period.client"
 
 async function findAll() : Promise<IPeriod[] | undefined> {
   return await client.findAll();
