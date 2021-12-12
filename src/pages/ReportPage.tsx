@@ -10,6 +10,7 @@ import reportService from "../service/report.service"
 import {IReport} from "../domain/IReport";
 import ReportFilterDialog from "../components/ReportFilterDialog";
 import {ReportContent} from "../components/ReportContent";
+import {ApiError} from "../error/ApiError";
 
 const useStyles = makeStyles({
   rootContent: {
@@ -39,8 +40,12 @@ export default function ReportPage() {
   useEffect(() => {
     (async () => {
       if(reportGenerationRequest) {
-        const reportGenerated = await reportService.generate(reportGenerationRequest as IReportGenerationRequest) as IReport;
-        setReport(reportGenerated);
+        try {
+          const reportGenerated = await reportService.generate(reportGenerationRequest as IReportGenerationRequest) as IReport;
+          setReport(reportGenerated);
+        } catch (apiError: ApiError | any) {
+          enqueueSnackbar(apiError.message, { variant: 'error' });
+        }
       }
     })();
   }, [reportGenerationRequest])

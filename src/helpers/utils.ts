@@ -24,3 +24,8 @@ export function formattedCurrency(currency: string, value: number) {
     default: return "ERROR";
   }
 }
+
+//prettier-ignore
+export function formattedPercentage(value: number) {
+  if (value) return (value*100).toFixed(2).toString().padStart(2, '0').padEnd(2, '0') + "%";
+}

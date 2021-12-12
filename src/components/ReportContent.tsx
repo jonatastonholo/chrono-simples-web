@@ -4,10 +4,11 @@ import {Card, makeStyles} from "@material-ui/core";
 import {theme} from "../Styles";
 import {IReport} from "../domain/IReport";
 import {Box, Typography} from "@mui/material";
-import {formattedCurrency} from "../helpers/utils";
+import {formattedCurrency, formattedPercentage} from "../helpers/utils";
 import {IWorkedHours} from "../domain/IWorkedHours";
 import {ReportContentValue} from "./ReportContentValue";
 import {ExpenseType} from "../domain/types/ExpenseType";
+import {DividerLine} from "./DividerLine";
 
 const useStyles = makeStyles({
   root: {
@@ -64,7 +65,7 @@ export function ReportContent({ report }: props) {
           </Typography>
           <ReportContentValue label={"Início"} value={report.periodBegin}/>
           <ReportContentValue label={"Fim"} value={report.periodEnd}/>
-          <ReportContentValue label={"Fator R"} value={report.rFactor}/>
+          <ReportContentValue label={"Fator R"} value={formattedPercentage(report.rFactor)}/>
           <ReportContentValue label={"Horas trabalhadas"} value={formatWorkedHours(report.workedHours)}/>
           <ReportContentValue label={"Dependentes cadastrados"} value={report.financialDependents}/>
           <ReportContentValue label={"Dedução no IRRF dos dependentes"} value={formattedCurrency("BRL",  report.financialDependentsDeduction)}/>
@@ -72,10 +73,11 @@ export function ReportContent({ report }: props) {
 
         <Card className={classes.content}>
           <Typography variant="h5" component="h2">
-            Faturamento
+            Faturamento do Período
           </Typography>
           <ReportContentValue label={"Últimos 12 meses"} value={formattedCurrency("BRL",  report.last12MonthEarnings)}/>
-          <ReportContentValue label={"Faturamento no período"} value={formattedCurrency("BRL",  report.periodEarnings)}/>
+          <ReportContentValue label={"Faturamento bruto"} value={formattedCurrency("BRL",  report.periodEarnings)}/>
+          <ReportContentValue label={"Faturamento líquido"} value={formattedCurrency("BRL",  report.liquidPeriodEarnings)}/>
           <ReportContentValue label={"Pró-labore bruto"} value={formattedCurrency("BRL",  report.baseProLabor)}/>
           <ReportContentValue label={"Pró-labore líquido"} value={formattedCurrency("BRL",  report.liquidProLabor)}/>
         </Card>
@@ -132,10 +134,10 @@ export function ReportContent({ report }: props) {
           </Typography>
           <ReportContentValue label={"Pró-labore"}  value={formattedCurrency("BRL",  report.proLaborToWithdrawal)}/>
           <ReportContentValue label={"Lucros"} value={formattedCurrency("BRL",  report.profitToWithdrawal)}/>
-          <ReportContentValue label={"Total a Sacar"} value={formattedCurrency("BRL",  report.amountToWithdrawal)}/>
+          <DividerLine/>
+          <ReportContentValue label={"Total a Sacar"} value={formattedCurrency("BRL",  report.totalAmountToWithdrawal)}/>
           <ReportContentValue label={"Fica na conta PJ"} value={formattedCurrency("BRL",  report.amountToKeep)}/>
         </Card>
-
 
       </Box>
     </>

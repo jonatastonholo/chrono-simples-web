@@ -6,11 +6,12 @@ export interface IReport {
   periodEnd: Date;
   last12MonthEarnings: number;
   periodEarnings: number;
+  liquidPeriodEarnings: number;
   baseProLabor: number;
   liquidProLabor: number;
   proLaborToWithdrawal: number;
   profitToWithdrawal: number;
-  amountToWithdrawal: number;
+  totalAmountToWithdrawal: number;
   amountToKeep: number;
   rFactor: number;
   financialDependents: number;
