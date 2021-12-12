@@ -6,7 +6,7 @@ const API_KEY: string = process.env.REACT_APP_BACKEND_API_KEY!;
 
 const httpClient = axios.create({
   baseURL: BASE_URL,
-  timeout:1000,
+  timeout:10000,
   withCredentials: false
 })
 

@@ -8,15 +8,16 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import {theme} from "../Styles";
-import {IProject} from "../domain/IProject";
+import {IPeriod} from "../domain/IPeriod";
 import {toCurrency} from "../helpers/utils";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {IconButton, Stack} from "@mui/material";
 import TablePagination from '@mui/material/TablePagination';
+import {IProject} from "../domain/IProject";
 
 interface Column {
-  id: "name" | "hourValue" | "currencyCode" | "action";
+  id: "projectName" | "description" | "hourValue" | "currency" | "begin" | "end" | "action";
   label: string;
   minWidth?: number;
   width?: number;
@@ -25,7 +26,8 @@ interface Column {
 }
 
 const columns: Column[] = [
-  { id: "name", label: "Nome", width: 50},
+  { id: "projectName", label: "Projeto", width: 100},
+  { id: "description", label: "Descrição", width: 100},
   {
     id: "hourValue",
     label: "Hora/Valor",
@@ -34,15 +36,25 @@ const columns: Column[] = [
     format: (value: number) => toCurrency(value),
   },
   {
-    id: "currencyCode",
+    id: "currency",
     label: "Moeda",
+    width: 50,
+  },
+  {
+    id: "begin",
+    label: "Início",
+    width: 50,
+  },
+  {
+    id: "end",
+    label: "Fim",
     width: 50,
   },
   {
     id: "action",
     label: "Ação",
     width: 50,
-  }
+  },
 ];
 
 const background = "#2B2B2C";
@@ -70,17 +82,17 @@ const useStyles = makeStyles({
 });
 
 type props = {
-  projects: IProject[];
-  onDelete: (projectId: string) => void
-  onEdit: (projectId: string) => void
+  periods: IPeriod[];
+  onDelete: (periodId: string) => void
+  onEdit: (periodId: string) => void
 };
 
-export default function ProjectTable({ projects, onDelete, onEdit }: props) {
+export default function PeriodTable({ periods, onDelete, onEdit }: props) {
   const classes = useStyles();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  if (!projects || projects.length === 0) {
+  if (!periods || periods.length === 0) {
     return <></>;
   }
 
@@ -93,12 +105,12 @@ export default function ProjectTable({ projects, onDelete, onEdit }: props) {
     setPage(0);
   };
 
-  const handleEditClick = (projectId : string) => {
-    onEdit(projectId);
+  const handleEditClick = (periodId : string) => {
+    onEdit(periodId);
   }
 
-  const handleDeleteClick = (projectId : string) => {
-    onDelete(projectId);
+  const handleDeleteClick = (periodId : string) => {
+    onDelete(periodId);
   }
 
   return (
@@ -120,12 +132,18 @@ export default function ProjectTable({ projects, onDelete, onEdit }: props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {projects.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => {
+            {periods.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((period) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.id}>
+                <TableRow hover role="checkbox" tabIndex={-1} key={period.id}>
                   {columns.map((column) => {
                     if (column.id !== 'action') {
-                      const value = row[column.id];
+                      let value;
+                      if(column.id === 'projectName') {
+                        const project = period['project'] as IProject;
+                        value = project.name;
+                      } else {
+                        value = period[column.id];
+                      }
                       return (
                         <TableCell
                           className={classes.tableContent}
@@ -143,8 +161,8 @@ export default function ProjectTable({ projects, onDelete, onEdit }: props) {
                         align={column.align}
                       >
                         <Stack direction="row" spacing={2}>
-                          <IconButton aria-label="edit" onClick={() => handleEditClick(row.id)}><EditIcon /></IconButton>
-                          <IconButton aria-label="delete" onClick={() => handleDeleteClick(row.id)}><DeleteIcon /></IconButton>
+                          <IconButton aria-label="edit" onClick={() => handleEditClick(period.id)}><EditIcon /></IconButton>
+                          <IconButton aria-label="delete" onClick={() => handleDeleteClick(period.id)}><DeleteIcon /></IconButton>
                         </Stack>
                       </TableCell>
                     );
@@ -161,7 +179,7 @@ export default function ProjectTable({ projects, onDelete, onEdit }: props) {
         className={classes.tableFooter}
         rowsPerPageOptions={[5, 10, 25, 50]}
         component="div"
-        count={projects.length}
+        count={periods.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}

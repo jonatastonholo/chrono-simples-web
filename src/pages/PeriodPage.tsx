@@ -1,9 +1,9 @@
 import {CardPanel} from "../components/CardPanel";
-import ProjectTable from "../components/ProjectTable";
-import EditProjectDialog from "../components/EditProjectDialog";
+import PeriodTable from "../components/PeriodTable";
+import EditPeriodDialog from "../components/EditPeriodDialog";
 import React, {useEffect, useState} from "react";
-import {IProject} from "../domain/IProject";
-import projectService from "../service/project.service"
+import {IPeriod} from "../domain/IPeriod";
+import periodService from "../service/period.service"
 import {ContentHeader} from "../components/ContentHeader";
 import {Container} from "@mui/material";
 import {makeStyles} from "@material-ui/core";
@@ -29,29 +29,29 @@ const useStyles = makeStyles({
   },
 });
 
-export default function ProjectPage() {
+export default function PeriodPage() {
   const classes = useStyles();
   const { enqueueSnackbar } = useSnackbar();
 
   const [openEditDialog, setOpenEditDialog] = React.useState(false);
-  const [projectSelected, setProjectSelected] = React.useState<IProject | undefined>();
-  const [projects, setProjects] = useState<IProject[] | []>([]);
+  const [periodSelected, setPeriodSelected] = React.useState<IPeriod | undefined>();
+  const [periods, setPeriods] = useState<IPeriod[] | []>([]);
 
   useEffect(() => {
     (async () => {
-      await loadProjects();
+      await loadPeriods();
     })();
   }, []);
 
   useEffect(() => {
-    if(projectSelected) {
+    if(periodSelected) {
       setOpenEditDialog(true);
     }
-  }, [projectSelected]);
+  }, [periodSelected]);
 
-  const loadProjects = async() => {
-    const projects = (await projectService.findAll()) as Array<IProject>;
-    setProjects(projects);
+  const loadPeriods = async() => {
+    const periods = (await periodService.findAll()) as Array<IPeriod>;
+    setPeriods(periods);
   }
 
   const handleAddNewClick = () => {
@@ -60,42 +60,42 @@ export default function ProjectPage() {
 
   const handleClose = () => {
     setOpenEditDialog(false);
-    setProjectSelected(undefined);
+    setPeriodSelected(undefined);
   };
 
-  const handleSave = async (project: IProject) => {
+  const handleSave = async (period: IPeriod) => {
     try {
-      await projectService.save(project);
+      await periodService.save(period);
       setOpenEditDialog(false);
-      setProjectSelected(undefined);
-      enqueueSnackbar("Projeto salvo com sucesso", { variant: 'success' });
-      await loadProjects();
+      setPeriodSelected(undefined);
+      enqueueSnackbar("Período salvo com sucesso", { variant: 'success' });
+      await loadPeriods();
     } catch (apiError: ApiError | any) {
       enqueueSnackbar(apiError.message, { variant: 'error' });
     }
   }
 
-  async function handleDelete(projectId: string)  {
+  async function handleDelete(periodId: string)  {
     try {
-      await projectService.remove(projectId);
-      enqueueSnackbar("Projeto removido com sucesso", { variant: 'success' });
-      await loadProjects();
+      await periodService.remove(periodId);
+      enqueueSnackbar("Período removido com sucesso", { variant: 'success' });
+      await loadPeriods();
     } catch (apiError: ApiError | any) {
       enqueueSnackbar(apiError.message, { variant: 'error' });
     }
   }
 
-  async function handleEdit(projectId: string)  {
-    setProjectSelected(projects.find(p => p.id === projectId));
+  async function handleEdit(periodId: string)  {
+    setPeriodSelected(periods.find(p => p.id === periodId));
   }
 
   return (
     <CardPanel>
       <Container className={classes.rootContent}>
-        <ContentHeader title={"Projetos"} onAddNewClick={handleAddNewClick}/>
-        <ProjectTable projects={projects} onDelete={handleDelete} onEdit={handleEdit} />
-        <EditProjectDialog
-          project={projectSelected}
+        <ContentHeader title={"Períodos"} onAddNewClick={handleAddNewClick}/>
+        <PeriodTable periods={periods} onDelete={handleDelete} onEdit={handleEdit} />
+        <EditPeriodDialog
+          period={periodSelected}
           open={openEditDialog}
           onClose={handleClose}
           onSave={handleSave}

@@ -1,10 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import ProjectPage from "./pages/ProjectPage";
-import { IUser } from "./domain/IUser";
-import { LoginPage } from "./pages/LoginPage";
-import { authContext } from "./security/authContext";
-import { getSession } from "./service/security.service";
-import { HashRouter, Redirect, Route, Switch } from "react-router-dom";
+import PeriodPage from "./pages/PeriodPage";
+import {IUser} from "./domain/IUser";
+import {LoginPage} from "./pages/LoginPage";
+import {authContext} from "./security/authContext";
+import {getSession} from "./service/security.service";
+import {HashRouter, Redirect, Route, Switch} from "react-router-dom";
+import {PageHeader} from "./components/PageHeader";
+import {Container} from "@mui/material";
 
 export default function Main() {
   const [user, setUser] = useState<IUser | null | undefined>(null);
@@ -27,14 +30,20 @@ export default function Main() {
   if (user) {
     return (
         <authContext.Provider value={{ user, onSignOut }}>
-          <HashRouter>
-            <Switch>
-              <Route path="/projects">
-                <ProjectPage />
-              </Route>
-              <Redirect to={{ pathname: `/projects` }} />
-            </Switch>
-          </HashRouter>
+          <Container>
+            <PageHeader title={"Chrono Simples"} />
+            <HashRouter>
+              <Switch>
+                <Route path="/projects">
+                  <ProjectPage />
+                </Route>
+                <Route path="/periods">
+                  <PeriodPage />
+                </Route>
+                <Redirect to={{ pathname: `/projects` }} />
+              </Switch>
+            </HashRouter>
+          </Container>
         </authContext.Provider>
       );
   }
