@@ -81,8 +81,7 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
   }
 
   const handleRFactorChange = (evt: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-    setRFactor(parseFloat(evt.target.value));
-    setErrors({});
+    setRFactor(parseFloat(evt.target.value));setErrors({});
   };
 
   const handleDateRangePickerChange = (newValue: DateRange<Date>) => {

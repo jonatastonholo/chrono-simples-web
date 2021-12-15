@@ -1,16 +1,13 @@
-import {Divider} from "@mui/material";
+import {Divider, Theme} from "@mui/material";
 import * as React from "react";
-import {makeStyles} from "@material-ui/core";
+import {SxProps} from "@mui/system";
 
-const useStyles = makeStyles({
-  divider: {
-    paddingTop: "20px",
-  },
-});
-
-export function DividerLine() {
-  const classes = useStyles();
+type props = {
+  variant?: 'fullWidth' | 'inset' | 'middle';
+  sx?: SxProps<Theme>;
+}
+export function DividerLine({sx, variant}: props) {
   return(
-    <Divider className={classes.divider} variant='middle' />
+    <Divider variant={variant ?? 'middle'} sx={sx ?? {paddingTop: "20px"}} />
   );
 }

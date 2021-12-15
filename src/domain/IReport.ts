@@ -20,5 +20,5 @@ export interface IReport {
   irrfAmount: number;
   dasAmount: number;
   workedHours: IWorkedHours;
-  expenses?: IExpense[];
+  expenses: IExpense[];
 }

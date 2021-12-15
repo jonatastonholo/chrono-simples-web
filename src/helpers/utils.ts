@@ -1,3 +1,5 @@
+import {format,} from 'date-fns-tz';
+
 //prettier-ignore
 export function toReal(value: number): string {
   return new Intl.NumberFormat("pt-BR",
@@ -23,6 +25,12 @@ export function formattedCurrency(currency: string, value: number) {
     case "USD": return toDolar(value);
     default: return "ERROR";
   }
+}
+
+export function formattedDate(date: Date) : string {
+  return format(new Date(date), 'dd/MM/yyyy', {
+    timeZone: 'America/Sao_Paulo',
+  });
 }
 
 //prettier-ignore
