@@ -8,6 +8,7 @@ import {getSession} from "./service/security.service";
 import {HashRouter, Redirect, Route, Switch} from "react-router-dom";
 import {PageHeader} from "./components/PageHeader";
 import {Container} from "@mui/material";
+import ReportPage from "./pages/ReportPage";
 
 export default function Main() {
   const [user, setUser] = useState<IUser | null | undefined>(null);
@@ -39,6 +40,9 @@ export default function Main() {
                 </Route>
                 <Route path="/periods">
                   <PeriodPage />
+                </Route>
+                <Route path="/reports">
+                  <ReportPage />
                 </Route>
                 <Redirect to={{ pathname: `/projects` }} />
               </Switch>

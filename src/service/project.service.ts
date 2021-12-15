@@ -1,5 +1,5 @@
 import {IProject} from "../domain/IProject";
-import chronoSimplesClient from "../external/crhono-simples-api/project.client"
+import chronoSimplesClient from "../clients/crhono-simples-api/project.client"
 
 async function findAll() : Promise<IProject[] | undefined> {
   return await chronoSimplesClient.findAll();
