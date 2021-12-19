@@ -7,7 +7,6 @@ import {Box, Container, List, Typography} from "@mui/material";
 import {formattedCurrency, formattedDate, formattedPercentage} from "../helpers/utils";
 import {IWorkedHours} from "../domain/IWorkedHours";
 import {ReportContentValue} from "./ReportContentValue";
-import {ExpenseType} from "../domain/types/ExpenseType";
 import {DividerLine} from "./DividerLine";
 
 const useStyles = makeStyles({
@@ -131,7 +130,7 @@ export function ReportContent({ report }: props) {
             {
               report
                 .expenses
-                .filter(expense => expense.type === ExpenseType.PERSONAL)
+                .filter(expense => expense.type.value === 'PERSONAL')
                 .map(expense =>(
                     <ReportContentValue
                       key={expense.id}
@@ -160,7 +159,7 @@ export function ReportContent({ report }: props) {
             {
               report
                 .expenses
-                .filter(expense => expense.type === ExpenseType.COMPANY)
+                .filter(expense => expense.type.value === 'COMPANY')
                 .map(expense => (
                   <ReportContentValue
                     key={expense.id}

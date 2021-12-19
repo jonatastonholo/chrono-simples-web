@@ -1,10 +1,10 @@
-import {ExpenseType} from "./types/ExpenseType";
+import {IExpenseType} from "./types/IExpenseType";
 
 export interface IExpense {
   id: string;
   description: string;
   value: number;
-  type: ExpenseType;
+  type: IExpenseType;
   periodBegin: Date;
   periodEnd: Date;
   createdAt: Date;

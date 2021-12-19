@@ -2,6 +2,7 @@ import {IPeriod} from "../../domain/IPeriod";
 import client from './chronoSimples.client'
 import {IApiError} from "../../domain/IApiError";
 import {ApiError} from "../../error/ApiError";
+import {serverFormattedDateTime} from "../../helpers/utils";
 
 const BASE_URI = "/chrono-simples/v1/periods";
 
@@ -32,7 +33,7 @@ async function remove(periodId: string) : Promise<IPeriod> {
 async function update(period: IPeriod) : Promise<IPeriod> {
 
   try {
-    const response = await client.PUT(`${BASE_URI}/${period.id}`, {...period, projectId: period.project.id});
+    const response = await client.PUT(`${BASE_URI}/${period.id}`, {...period, projectId: period.project.id, begin: serverFormattedDateTime(period.begin), end: serverFormattedDateTime(period.end)});
     const { data } : { data: IPeriod } = response;
     return data;
   } catch (err: any) {
@@ -45,7 +46,7 @@ async function update(period: IPeriod) : Promise<IPeriod> {
 async function create(period: IPeriod) : Promise<IPeriod> {
 
   try {
-    const response = await client.POST(`${BASE_URI}`, {...period, projectId: period.project.id});
+    const response = await client.POST(`${BASE_URI}`, {...period, projectId: period.project.id, begin: serverFormattedDateTime(period.begin), end: serverFormattedDateTime(period.end)});
     const { data } : { data: IPeriod } = response;
     return data;
   } catch (err: any) {

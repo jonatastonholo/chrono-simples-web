@@ -9,11 +9,8 @@ import {theme} from "../Styles";
 import {Box, FormControl, InputAdornment, Stack, TextField} from "@mui/material";
 import {IPeriod} from "../domain/IPeriod";
 import {IValidationErrors} from "../domain/IValidationErrors";
-import LocalizationProvider from '@mui/lab/LocalizationProvider';
-import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import {IReportGenerationRequest} from "../domain/IReportGenerationRequest";
-import DateRangePicker, {DateRange} from '@mui/lab/DateRangePicker';
-import {ptBR} from "date-fns/locale";
+import DateRangeDialog from "./DateRageDialog";
 
 const useStyles = makeStyles({
   rootContent: {
@@ -37,7 +34,8 @@ interface IEventFormDialogProps {
 export default function ReportFilterDialog(props: IEventFormDialogProps) {
   const classes = useStyles();
   const [rFactor, setRFactor] = useState<number>(28.00);
-  const [dateRange, setDateRange] = React.useState<DateRange<Date>>([null, null]);
+  const [beginDate, setBeginDate] = React.useState<Date>();
+  const [endDate, setEndDate] = React.useState<Date>();
   const [errors, setErrors] = useState<IValidationErrors>({});
   const inputRFactor = useRef<HTMLInputElement | null>();
   const inputBeginDate = useRef<HTMLInputElement | null>();
@@ -47,7 +45,8 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
   const onCloseActions = () => {
     setErrors({});
     setRFactor(28.00);
-    setDateRange([null, null]);
+    setBeginDate(undefined);
+    setEndDate(undefined);
   }
 
   const handleCancel = () => {
@@ -58,7 +57,7 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
   function filter(evt: React.FormEvent) {
     evt.preventDefault();
     if (validate()) {
-      props.onFilter({periodBegin: dateRange[0] as Date, periodEnd: dateRange[1] as Date, rFactor: rFactor/100});
+      props.onFilter({periodBegin: beginDate as Date, periodEnd: endDate as Date, rFactor: rFactor/100});
     }
   }
 
@@ -68,11 +67,11 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
       currentErrors["rFactor"] = "O Fator R é obrigatório";
       inputRFactor.current?.focus();
     }
-    if (!dateRange[0]) {
+    if (!beginDate) {
       currentErrors["beginDateValue"] = "O início do período é obrigatório";
       inputBeginDate.current?.focus();
     }
-    if (!dateRange[1]) {
+    if (!endDate) {
       currentErrors["endDateValue"] = "O fim do período é obrigatório";
       inputEndDate.current?.focus();
     }
@@ -84,10 +83,11 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
     setRFactor(parseFloat(evt.target.value));setErrors({});
   };
 
-  const handleDateRangePickerChange = (newValue: DateRange<Date>) => {
-    setDateRange(newValue);
+  const handleDateRangeChange = (dateRangeBegin: Date, dateRangeEnd: Date) => {
+    setBeginDate(dateRangeBegin);
+    setEndDate(dateRangeEnd);
     setErrors({});
-  };
+  }
 
   return (
     <Dialog
@@ -126,31 +126,12 @@ export default function ReportFilterDialog(props: IEventFormDialogProps) {
                   helperText={errors.rFactor ? errors.rFactor : ''}
                 />
 
-                <LocalizationProvider dateAdapter={AdapterDateFns}  locale={ptBR}>
-                  <DateRangePicker
-                    startText="Início"
-                    endText="Fim"
-                    value={dateRange}
-                    onChange={handleDateRangePickerChange}
-                    renderInput={(startProps, endProps) => (
-                      <React.Fragment>
-                        <TextField
-                          {...startProps}
-                          inputRef={inputBeginDate}
-                          error={!!errors.beginDateValue}
-                          helperText={errors.beginDateValue ? errors.beginDateValue : ''}
-                        />
-                        <Box sx={{ mx: 2 }}> até </Box>
-                        <TextField
-                          {...endProps}
-                          inputRef={inputEndDate}
-                          error={!!errors.endDateValue}
-                          helperText={errors.endDateValue ? errors.endDateValue : ''}
-                        />
-                      </React.Fragment>
-                    )}
-                  />
-                </LocalizationProvider>
+                <DateRangeDialog
+                  errorBeginDateValue={errors["beginDateValue"]}
+                  errorEndDateValue={errors["endDateValue"]}
+                  onDataRangeChange={handleDateRangeChange}
+                />
+
               </Stack>
             </FormControl>
           </DialogContent>

@@ -12,11 +12,12 @@ import {ICurrency} from "../domain/ICurrency";
 import {IValidationErrors} from "../domain/IValidationErrors";
 import {IProject} from "../domain/IProject";
 import projectService from "../service/project.service"
-import {useSnackbar} from "notistack";
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import {ptBR} from "date-fns/locale";
+import {addSeconds} from 'date-fns'
+import {getDateWithCorrectTimezone} from "../helpers/utils";
 
 const currencies = [
   {
@@ -50,26 +51,45 @@ interface IEventFormDialogProps {
 
 export default function EditPeriodDialog(props: IEventFormDialogProps) {
   const classes = useStyles();
-  const {enqueueSnackbar} = useSnackbar();
   const [period, setPeriod] = useState<IPeriod | undefined>(props.period);
-  const [beginDateValue, setBeginDateValue] = useState<Date | null>(new Date());
-  const [endDateValue, setEndDateValue] = useState<Date | null>(new Date());
+  const [beginDateValue, setBeginDateValue] = useState<Date | null>();
+  const [endDateValue, setEndDateValue] = useState<Date | null>();
   const [projects, setProjects] = useState<IProject[] | []>([]);
   const [project, setProject] = useState<IProject>();
   const [errors, setErrors] = useState<IValidationErrors>({});
   const [currencyValue, setCurrencyValue] = useState<string | undefined>("BRL");
   const [currencyLabel, setCurrencyLabel] = useState<string | undefined>('R$');
   const inputHourValue = useRef<HTMLInputElement | null>();
+  const inputProject = useRef<HTMLInputElement | null>();
   const title =
     !period?.id
-      ? "Criar Novo Projeto"
+      ? "Criar Novo Período"
       : `Editar Período`;
 
   useEffect(() => {
     (async () => {
       if (props.open) {
-        await loadProjects();
-        setPeriod(props.period);
+        const selectedProject = await loadProjects();
+
+        const beginDate =
+          props.period
+            ? getDateWithCorrectTimezone(props.period.begin)
+            : new Date();
+
+        const endDate =
+          props.period
+            ? getDateWithCorrectTimezone(props.period.end)
+            : addSeconds(new Date(), 1);
+
+        const hourValue =
+          props.period
+            ? props.period.hourValue
+            : selectedProject?.hourValue;
+
+        setBeginDateValue(beginDate);
+        setEndDateValue(endDate);
+        setPeriod({...props.period, project: selectedProject, currency: currencyValue, hourValue, begin: beginDate, end: endDate} as IPeriod);
+
       } else {
         onCloseActions();
       }
@@ -89,48 +109,24 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
         ? currencies.find(curr => curr.value === props.period?.currency)
         : currencies.find(curr => curr.value === 'BRL');
 
-      const beginDate =
-        props.period
-        ? props.period.begin
-        : new Date();
-
-      const endDate =
-        props.period
-        ? props.period.end
-        : new Date();
-
       const projectSelected =
         period
         ? projects.find(p => p.id === period.project.id)
         : projects[0];
 
       setProject(projectSelected);
-      setBeginDateValue(beginDate);
-      setEndDateValue(endDate);
       setCurrencyValue(currencyFound?.value);
       setCurrencyLabel(currencyFound?.label);
     }
   }, [projects]);
 
-  // useEffect(() => {
-  //   if(props.open) {
-  //     setPeriod(period);
-  //     setErrors({});
-  //     if (period) {
-  //       const currencyVal = currencies.find(curr => curr.value === period?.currency);
-  //       setCurrencyValue(currencyVal?.value);
-  //       setCurrencyLabel(currencyVal?.label);
-  //     }
-  //   }
-  // }, [period]);
-  //
   useEffect(() => {
     if (props.open) {
       setPeriod(props.period);
     }
   }, [props.period, props.open]);
 
-  const loadProjects = async () => {
+  const loadProjects = async () : Promise<IProject | undefined> => {
     const projectList = await projectService.findAll();
 
     if (projectList) {
@@ -141,7 +137,9 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
 
       setProjects(projectList);
       setProject(selectedProject as IProject);
+      return projectList[0];
     }
+    return undefined;
   }
 
   const onCloseActions = () => {
@@ -183,6 +181,10 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
 
   function validate(): boolean {
     const currentErrors: IValidationErrors = {};
+    if (!period?.project) {
+      currentErrors["project"] = "O projeto é obrigatório";
+      inputProject.current?.focus();
+    }
     if (!period?.hourValue) {
       currentErrors["hourValue"] = "O valor hora é obrigatório";
       inputHourValue.current?.focus();
@@ -200,12 +202,6 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
     setEndDateValue(newValue);
     setPeriod({...period, end: newValue} as IPeriod);
   };
-
-  // if(props.open && (!project || !projects || projects.length === 0)) {
-  //   enqueueSnackbar('Não existem projetos cadastrados ainda. Crie primeiro os projetos.', { variant: 'error' });
-  //   onCloseActions();
-  //   props.onClose();
-  // }
 
   return (
     <Dialog
@@ -235,21 +231,21 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                 />
 
                 <TextField
-                  id="projects"
+                  id="project"
                   select
-                  label="Projetos"
+                  label="Projeto"
                   value={project?.id}
+                  error={!!errors.project}
+                  helperText={errors.project ? errors.project : ''}
                   onChange={handleProjectChange}
                   SelectProps={{
                     native: true,
                   }}
-                  helperText="Selectione o projeto"
                   variant="filled"
-                  defaultValue={project?.id}
                 >
-                  {projects.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
+                  {projects.map((project) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name}
                     </option>
                   ))}
                 </TextField>
@@ -265,7 +261,6 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                   }}
                   helperText="Selecione a Moeda"
                   variant="filled"
-                  defaultValue={currencyValue}
                 >
                   {currencies.map((option) => (
                     <option key={option.value} value={option.value}>
@@ -283,7 +278,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                   type="text"
                   fullWidth
                   variant="standard"
-                  defaultValue={period?.hourValue}
+                  value={period?.hourValue}
                   inputProps={{
                     inputMode: 'numeric', pattern: '^[0-9]+(\\.[0-9]{1,2})?$',
                     startAdornment: <InputAdornment position="start">{currencyLabel}</InputAdornment>,
@@ -297,13 +292,13 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                 />
                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={ptBR}>
                   <DateTimePicker
-                    label="Date&Time picker"
+                    label="Início"
                     value={beginDateValue}
                     onChange={handleBeginDateValueChange}
                     renderInput={(params) => <TextField {...params} />}
                   />
                   <DateTimePicker
-                    label="Date&Time picker"
+                    label="Fim"
                     value={endDateValue}
                     onChange={handleEndDateValueChange}
                     renderInput={(params) => <TextField {...params} />}

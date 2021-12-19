@@ -9,6 +9,7 @@ import {HashRouter, Redirect, Route, Switch} from "react-router-dom";
 import {PageHeader} from "./components/PageHeader";
 import {Container} from "@mui/material";
 import ReportPage from "./pages/ReportPage";
+import ExpensePage from "./pages/ExpensePage";
 
 export default function Main() {
   const [user, setUser] = useState<IUser | null | undefined>(null);
@@ -43,6 +44,9 @@ export default function Main() {
                 </Route>
                 <Route path="/reports">
                   <ReportPage />
+                </Route>
+                <Route path="/expenses">
+                  <ExpensePage />
                 </Route>
                 <Redirect to={{ pathname: `/projects` }} />
               </Switch>

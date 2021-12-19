@@ -28,9 +28,26 @@ export function formattedCurrency(currency: string, value: number) {
 }
 
 export function formattedDate(date: Date) : string {
-  return format(new Date(date), 'dd/MM/yyyy', {
+  return format(getDateWithCorrectTimezone(date), 'dd/MM/yyyy', {
     timeZone: 'America/Sao_Paulo',
   });
+}
+
+export function formattedDateTime(date: Date) : string {
+  return format(getDateWithCorrectTimezone(date), 'dd/MM/yyyy HH:mm:ss', {
+    timeZone: 'America/Sao_Paulo',
+  });
+}
+
+export function serverFormattedDateTime(date: Date) : string {
+  return format(date, "yyyy-MM-dd'T'HH:mm:ss.SSSSSS", {
+    timeZone: 'America/Sao_Paulo',
+  });
+}
+
+export function getDateWithCorrectTimezone(date: Date) : Date {
+  const dt = new Date(date);
+  return  new Date(dt.valueOf() + dt.getTimezoneOffset() * 60 * 1000);
 }
 
 //prettier-ignore
