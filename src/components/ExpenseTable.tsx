@@ -8,50 +8,57 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import {theme} from "../Styles";
-import {IPeriod} from "../domain/IPeriod";
-import {formattedDateTime, toCurrency} from "../helpers/utils";
+import {IExpense} from "../domain/IExpense";
+import {formattedDate, toCurrency} from "../helpers/utils";
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import {IconButton} from "@mui/material";
 import TablePagination from '@mui/material/TablePagination';
-import {IProject} from "../domain/IProject";
+import {IExpenseType} from "../domain/types/IExpenseType";
 
 interface Column {
-  id: "projectName" | "description" | "hourValue" | "currency" | "begin" | "end" | "action";
+  id: "description" | "value" | "type" | "periodBegin" | "periodEnd" | "action";
   label: string;
   minWidth?: number;
   width?: number;
   align?: "right" | "center" | "left";
   formatCurrency?: (value: number) => string;
-  formatDateTime?: (value: Date) => string;
+  formatDate?: (value: Date) => string;
 }
 
 const columns: Column[] = [
-  { id: "projectName", label: "Projeto", width: 100},
-  { id: "description", label: "Descrição", width: 100},
   {
-    id: "hourValue",
-    label: "Hora/Valor",
+    id: "description",
+    label: "Descrição",
+    width: 100,
+    align: "left",
+  },
+  {
+    id: "value",
+    label: "Valor (R$)",
     width: 50,
-    align: "right",
+    align: "center",
     formatCurrency: (value: number) => toCurrency(value),
   },
   {
-    id: "currency",
-    label: "Moeda",
+    id: "type",
+    label: "Tipo",
     width: 50,
+    align: "left",
   },
   {
-    id: "begin",
-    label: "Início",
+    id: "periodBegin",
+    label: "Início do Período",
     width: 50,
-    formatDateTime: (value: Date) => formattedDateTime(value),
+    align: "center",
+    formatDate: (value: Date) => formattedDate(value),
   },
   {
-    id: "end",
-    label: "Fim",
+    id: "periodEnd",
+    label: "Fim do Período",
     width: 50,
-    formatDateTime: (value: Date) => formattedDateTime(value),
+    align: "center",
+    formatDate: (value: Date) => formattedDate(value),
   },
   {
     id: "action",
@@ -75,9 +82,10 @@ const useStyles = makeStyles({
     background,
     color: theme.fonts.color,
     fontWeight: 800,
+    textAlign: "center"
   },
   tableContent: {
-    color: theme.fonts.color,
+    color: theme.fonts.color
   },
   tableFooter: {
     background,
@@ -86,17 +94,17 @@ const useStyles = makeStyles({
 });
 
 type props = {
-  periods: IPeriod[];
-  onDelete: (periodId: string) => void
-  onEdit: (periodId: string) => void
+  expenses: IExpense[];
+  onDelete: (expenseId: string) => void
+  onEdit: (expenseId: string) => void
 };
 
-export default function PeriodTable({ periods, onDelete, onEdit }: props) {
+export default function ExpenseTable({ expenses, onDelete, onEdit }: props) {
   const classes = useStyles();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
-  if (!periods || periods.length === 0) {
+  if (!expenses || expenses.length === 0) {
     return <></>;
   }
 
@@ -109,17 +117,21 @@ export default function PeriodTable({ periods, onDelete, onEdit }: props) {
     setPage(0);
   };
 
-  const handleEditClick = (periodId : string) => {
-    onEdit(periodId);
+  const handleEditClick = (expenseId : string) => {
+    onEdit(expenseId);
   }
 
-  const handleDeleteClick = (periodId : string) => {
-    onDelete(periodId);
+  const handleDeleteClick = (expenseId : string) => {
+    onDelete(expenseId);
   }
 
   const handleValue = (column: Column,  value: any) : string => {
     if (column.formatCurrency && typeof value === "number") return column.formatCurrency(value);
-    if (column.formatDateTime) return column.formatDateTime(value);
+    if (column.formatDate) return column.formatDate(value);
+    if (typeof value === "object") {
+      const type = value as IExpenseType;
+      return type.description;
+    }
     return value;
   }
 
@@ -132,7 +144,6 @@ export default function PeriodTable({ periods, onDelete, onEdit }: props) {
               {columns.map((column) => (
                 <TableCell
                   key={column.id}
-                  align={column.align}
                   style={{ minWidth: column.minWidth, width: column.width }}
                   className={classes.tableHeader}
                 >
@@ -142,19 +153,12 @@ export default function PeriodTable({ periods, onDelete, onEdit }: props) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {periods
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((period) => {
+            {expenses.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((expense) => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={period.id}>
+                <TableRow hover role="checkbox" tabIndex={-1} key={expense.id}>
                   {columns.map((column) => {
                     if (column.id !== 'action') {
-                      let value;
-                      if(column.id === 'projectName') {
-                        const project = period['project'] as IProject;
-                        value = project.name;
-                      } else {
-                        value = period[column.id];
-                      }
+                      let value = expense[column.id];
                       return (
                         <TableCell
                           className={classes.tableContent}
@@ -165,17 +169,17 @@ export default function PeriodTable({ periods, onDelete, onEdit }: props) {
                         </TableCell>
                       );
                     }
-
                     return (
                       <TableCell
                         className={classes.tableContent}
                         key={column.id}
                         align={column.align}
                       >
-                        <IconButton aria-label="edit" onClick={() => handleEditClick(period.id)}><EditIcon /></IconButton>
-                        <IconButton aria-label="delete" onClick={() => handleDeleteClick(period.id)}><DeleteIcon /></IconButton>
+                        <IconButton aria-label="edit" onClick={() => handleEditClick(expense.id)}><EditIcon /></IconButton>
+                        <IconButton aria-label="delete" onClick={() => handleDeleteClick(expense.id)}><DeleteIcon /></IconButton>
                       </TableCell>
                     );
+
                   })}
                 </TableRow>
               );
@@ -184,11 +188,11 @@ export default function PeriodTable({ periods, onDelete, onEdit }: props) {
         </Table>
       </TableContainer>
       <TablePagination
-        labelRowsPerPage="Períodos por página:"
+        labelRowsPerPage="Despesas por página:"
         className={classes.tableFooter}
         rowsPerPageOptions={[5, 10, 25, 50]}
         component="div"
-        count={periods.length}
+        count={expenses.length}
         rowsPerPage={rowsPerPage}
         page={page}
         onPageChange={handleChangePage}
