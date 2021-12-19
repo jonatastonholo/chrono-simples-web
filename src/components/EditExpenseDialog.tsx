@@ -43,7 +43,7 @@ export default function EditExpenseDialog(props: IEventFormDialogProps) {
   const expenseDescription = expense?.description;
   const title =
     !expense?.id
-      ? "Criar Novo Gasto"
+      ? "Criar Nova Despesa"
       : `Editar "${expenseDescription}"`;
 
   useEffect(() => {

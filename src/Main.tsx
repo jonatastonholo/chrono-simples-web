@@ -10,6 +10,7 @@ import {PageHeader} from "./components/PageHeader";
 import {Container} from "@mui/material";
 import ReportPage from "./pages/ReportPage";
 import ExpensePage from "./pages/ExpensePage";
+import FinancialDependentPage from "./pages/FinancialDependentPage";
 
 export default function Main() {
   const [user, setUser] = useState<IUser | null | undefined>(null);
@@ -48,7 +49,10 @@ export default function Main() {
                 <Route path="/expenses">
                   <ExpensePage />
                 </Route>
-                <Redirect to={{ pathname: `/projects` }} />
+                <Route path="/dependents">
+                  <FinancialDependentPage />
+                </Route>
+                <Redirect to={{ pathname: `/periods` }} />
               </Switch>
             </HashRouter>
           </Container>

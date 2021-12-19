@@ -10,7 +10,6 @@ async function remove(expenseId: string) : Promise<IExpense> {
 }
 
 async function save(expense: IExpense) : Promise<IExpense> {
-  console.log(expense)
   if (!expense.id) return await client.create(expense);
   return await client.update(expense);
 }

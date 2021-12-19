@@ -10,7 +10,6 @@ async function remove(projectId: string) : Promise<IProject> {
 }
 
 async function save(project: IProject) : Promise<IProject> {
-  console.log(project)
   if (!project.id) return await chronoSimplesClient.create(project);
   return await chronoSimplesClient.update(project);
 }
