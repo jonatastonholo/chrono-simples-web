@@ -10,7 +10,6 @@ async function remove(periodId: string) : Promise<IPeriod> {
 }
 
 async function save(period: IPeriod) : Promise<IPeriod> {
-  console.log(period)
   if (!period.id) return await client.create(period);
   return await client.update(period);
 }

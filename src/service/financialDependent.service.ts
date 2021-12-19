@@ -10,7 +10,6 @@ async function remove(financialDependentId: string) : Promise<IFinancialDependen
 }
 
 async function save(financialDependent: IFinancialDependent) : Promise<IFinancialDependent> {
-  console.log(financialDependent)
   if (!financialDependent.id) return await client.create(financialDependent);
   return await client.update(financialDependent);
 }
