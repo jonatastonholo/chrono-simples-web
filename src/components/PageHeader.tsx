@@ -5,6 +5,7 @@ import {theme} from "../Styles";
 import Box from "@material-ui/core/Box";
 import {UserMenu} from "./UserMenu";
 import {StopwatchMenu} from "./StopwatchMenu";
+import SwipeableTemporaryDrawer from "./SwipeableTemporaryDrawer";
 
 type Props = {
   title: string;
@@ -36,6 +37,9 @@ export function PageHeader({ title }: Props) {
     <Card className={classes.header}>
       <Typography variant="h5" component="h2">
         <Box className={classes.content}>
+          <Box>
+            <SwipeableTemporaryDrawer/>
+          </Box>
           <Box flex="1" padding="1rem" marginLeft="5.35rem">
             {title}
           </Box>

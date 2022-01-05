@@ -34,8 +34,8 @@ export default function Main() {
     return (
         <authContext.Provider value={{ user, onSignOut }}>
           <Container>
-            <PageHeader title={"Chrono Simples"} />
             <HashRouter>
+              <PageHeader title={"Chrono Simples"} />
               <Switch>
                 <Route path="/projects">
                   <ProjectPage />

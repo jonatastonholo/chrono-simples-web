@@ -231,6 +231,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                 />
 
                 <TextField
+                  className={classes.textField}
                   id="project"
                   select
                   label="Projeto"
@@ -251,6 +252,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                 </TextField>
 
                 <TextField
+                  className={classes.textField}
                   id="currency"
                   select
                   label="Moeda"
@@ -290,7 +292,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                     setPeriod(p);
                   }}
                 />
-                <LocalizationProvider dateAdapter={AdapterDateFns} locale={ptBR}>
+                <LocalizationProvider dateAdapter={AdapterDateFns} locale={ptBR} className={classes.textField}>
                   <DateTimePicker
                     label="Início"
                     value={beginDateValue}
