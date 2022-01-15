@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from "react";
+import React, {ChangeEvent, useEffect, useRef, useState} from "react";
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
@@ -17,7 +17,6 @@ import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import {ptBR} from "date-fns/locale";
 import {addSeconds} from 'date-fns'
-import {getDateWithCorrectTimezone} from "../helpers/utils";
 
 const currencies = [
   {
@@ -59,6 +58,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
   const [errors, setErrors] = useState<IValidationErrors>({});
   const [currencyValue, setCurrencyValue] = useState<string | undefined>("BRL");
   const [currencyLabel, setCurrencyLabel] = useState<string | undefined>('R$');
+  const [hourValue, setHourValue] = useState<string | undefined>();
   const inputHourValue = useRef<HTMLInputElement | null>();
   const inputProject = useRef<HTMLInputElement | null>();
   const title =
@@ -69,16 +69,16 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
   useEffect(() => {
     (async () => {
       if (props.open) {
-        const selectedProject = await loadProjects();
+        const selectedProject = await loadProject();
 
         const beginDate =
           props.period
-            ? getDateWithCorrectTimezone(props.period.begin)
+            ? props.period.begin
             : new Date();
 
         const endDate =
           props.period
-            ? getDateWithCorrectTimezone(props.period.end)
+            ? props.period.end
             : addSeconds(new Date(), 1);
 
         const hourValue =
@@ -88,8 +88,8 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
 
         setBeginDateValue(beginDate);
         setEndDateValue(endDate);
-        setPeriod({...props.period, project: selectedProject, currency: currencyValue, hourValue, begin: beginDate, end: endDate} as IPeriod);
-
+        setPeriod({...props.period, projectId: selectedProject?.id, project: selectedProject, currency: currencyValue, hourValue, begin: beginDate, end: endDate} as IPeriod);
+        setHourValue(hourValue?.toString());
       } else {
         onCloseActions();
       }
@@ -117,6 +117,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
       setProject(projectSelected);
       setCurrencyValue(currencyFound?.value);
       setCurrencyLabel(currencyFound?.label);
+      setHourValue(projectSelected?.hourValue.toString())
     }
   }, [projects]);
 
@@ -126,18 +127,18 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
     }
   }, [props.period, props.open]);
 
-  const loadProjects = async () : Promise<IProject | undefined> => {
+  const loadProject = async () : Promise<IProject | undefined> => {
     const projectList = await projectService.findAll();
 
     if (projectList) {
       const selectedProject =
       props.period
-        ? props.period.project.id
+        ? props.period.project
         : projectList[0];
 
       setProjects(projectList);
       setProject(selectedProject as IProject);
-      return projectList[0];
+      return selectedProject;
     }
     return undefined;
   }
@@ -150,6 +151,7 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
     setCurrencyValue("BRL");
     setBeginDateValue(null);
     setEndDateValue(null);
+    setHourValue(undefined);
   }
 
   const handleCancel = () => {
@@ -169,13 +171,15 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
     let selectedProjectId = event.target.value;
     const selectedProject = projects.find(p => p.id === selectedProjectId) as IProject;
     setProject(selectedProject);
-    setPeriod({...period, projectId: selectedProjectId, currency: selectedProject.currencyCode, hourValue: selectedProject.hourValue} as IPeriod)
+    setPeriod({...period, projectId: selectedProject.id, project: selectedProject, currency: selectedProject.currencyCode, hourValue: selectedProject.hourValue} as IPeriod)
+    setHourValue(selectedProject?.hourValue.toString())
   };
 
   function save(evt: React.FormEvent) {
     evt.preventDefault();
     if (validate()) {
-      props.onSave(period as IPeriod);
+      const value = hourValue ? parseFloat(hourValue) : 0;
+      props.onSave({...period, hourValue: value} as IPeriod);
     }
   }
 
@@ -189,6 +193,18 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
       currentErrors["hourValue"] = "O valor hora é obrigatório";
       inputHourValue.current?.focus();
     }
+
+    if (hourValue === undefined || hourValue === "") {
+      currentErrors["hourValue"] = "O valor hora é obrigatório";
+      inputHourValue.current?.focus();
+    } else {
+      try {
+        parseFloat(hourValue);
+      }catch (e) {
+        currentErrors["hourValue"] = "O valor hora está incorreto";
+      }
+    }
+
     setErrors(currentErrors);
     return Object.keys(currentErrors).length === 0;
   }
@@ -201,6 +217,10 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
   const handleEndDateValueChange = (newValue: Date | null) => {
     setEndDateValue(newValue);
     setPeriod({...period, end: newValue} as IPeriod);
+  };
+
+  const handleHourValueChange = (evt: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    setHourValue(evt.target.value);
   };
 
   return (
@@ -276,22 +296,23 @@ export default function EditPeriodDialog(props: IEventFormDialogProps) {
                   autoFocus
                   margin="dense"
                   id="hourValue"
-                  label="Hora/Valor"
+                  label="Valor/Hora"
                   type="text"
                   fullWidth
                   variant="standard"
-                  value={period?.hourValue}
+                  value={hourValue}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                  }}
                   inputProps={{
-                    inputMode: 'numeric', pattern: '^[0-9]+(\\.[0-9]{1,2})?$',
-                    startAdornment: <InputAdornment position="start">{currencyLabel}</InputAdornment>,
+                    inputMode: 'numeric',
+                    pattern: '^[0-9]+(\\.[0-9]{1,2})?$',
                   }}
                   error={!!errors.hourValue}
-                  onChange={(evt) => {
-                    const hourValue = parseFloat(evt.target.value);
-                    const p = {...period, hourValue, currency: currencyValue} as IPeriod;
-                    setPeriod(p);
-                  }}
+                  helperText={errors.hourValue ? errors.hourValue : ''}
+                  onChange={handleHourValueChange}
                 />
+
                 <LocalizationProvider dateAdapter={AdapterDateFns} locale={ptBR} className={classes.textField}>
                   <DateTimePicker
                     label="Início"
