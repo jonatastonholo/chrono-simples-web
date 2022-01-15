@@ -21,6 +21,11 @@ const useStyles = makeStyles({
     color: theme.fonts.color,
     background: theme.background,
   },
+  menuButton: {
+    paddingTop: '1.0rem',
+    marginLeft: '1.0rem',
+    marginRight: '-3.5rem',
+  }
 });
 
 export default function SwipeableTemporaryDrawer() {
@@ -79,7 +84,9 @@ export default function SwipeableTemporaryDrawer() {
   return (
     <div>
       <React.Fragment >
-        <IconButton aria-label="edit" onClick={toggleDrawer("left", true)}><MenuIcon /></IconButton>
+        <Box className={classes.menuButton}>
+          <IconButton aria-label="menu" onClick={toggleDrawer("left", true)}><MenuIcon /></IconButton>
+        </Box>
         <SwipeableDrawer
           anchor="left"
           open={state["left"]}
