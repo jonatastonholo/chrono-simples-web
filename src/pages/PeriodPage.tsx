@@ -50,8 +50,10 @@ export default function PeriodPage() {
   }, [periodSelected]);
 
   const loadPeriods = async() => {
-    const periods = (await periodService.findAll()) as Array<IPeriod>;
-    setPeriods(periods);
+    const periods = await periodService.findAll();
+    if (periods) {
+      setPeriods(periods);
+    }
   }
 
   const handleAddNewClick = () => {

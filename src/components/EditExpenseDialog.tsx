@@ -6,7 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import Dialog from '@mui/material/Dialog';
 import {makeStyles} from "@material-ui/core";
 import {theme} from "../Styles";
-import {Box, FormControl, InputAdornment, TextField} from "@mui/material";
+import {Box, FormControl, InputAdornment, Stack, TextField} from "@mui/material";
 import {IExpense} from "../domain/IExpense";
 import {IValidationErrors} from "../domain/IValidationErrors";
 import {expensesType, ExpenseType} from "../domain/types/ExpenseType";
@@ -36,7 +36,6 @@ export default function EditExpenseDialog(props: IEventFormDialogProps) {
   const classes = useStyles();
   const defaultExpenseType = {value: "COMPANY", description: ExpenseType.COMPANY}
   const [expense, setExpense] = useState<IExpense | undefined>(props.expense);
-  const [expenseType, setExpenseType] = useState<IExpenseType>(props.expense?.type ?? defaultExpenseType);
   const [errors, setErrors] = useState<IValidationErrors>({});
   const inputName = useRef<HTMLInputElement | null>();
   const inputHourValue = useRef<HTMLInputElement | null>();
@@ -65,15 +64,13 @@ export default function EditExpenseDialog(props: IEventFormDialogProps) {
 
   const onDialogClose = () => {
     setExpense(undefined);
-    setExpenseType(defaultExpenseType);
     setErrors({});
     props.onClose();
   }
 
-  const handleExpenseTypeChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
-    let selectedType = evt.target.value;
-    setExpenseType(expensesType.find(type => type.value === selectedType) as IExpenseType);
-    setExpense({...expense, type: expenseType} as IExpense)
+  const handleExpenseTypeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let selectedType = event.target.value;
+    setExpense({...expense, type: expensesType.find(type => type.value === selectedType) as IExpenseType} as IExpense)
     setErrors({});
   };
 
@@ -139,71 +136,74 @@ export default function EditExpenseDialog(props: IEventFormDialogProps) {
           <DialogTitle>{title}</DialogTitle>
           <DialogContent>
             <FormControl fullWidth >
-              <TextField
-                id="type"
-                select
-                label="Tipo de gasto"
-                value={expenseType}
-                error={!!errors.type}
-                helperText={errors.type ? errors.type : ''}
-                onSelect={handleExpenseTypeChange}
-                SelectProps={{
-                  native: true,
-                }}
-                variant="filled"
-              >
-                {expensesType.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.description}
-                  </option>
-                ))}
-              </TextField>
+              <Stack spacing={3}>
+                <TextField
+                  className={classes.textField}
+                  id="type"
+                  select
+                  label="Tipo de gasto"
+                  value={expense?.type.value}
+                  error={!!errors.type}
+                  helperText={errors.type ? errors.type : ''}
+                  onChange={handleExpenseTypeChange}
+                  SelectProps={{
+                    native: true,
+                  }}
+                  variant="filled"
+                >
+                  {expensesType.map((type) => (
+                    <option key={type.value} value={type.value}>
+                      {type.description}
+                    </option>
+                  ))}
+                </TextField>
 
-              <TextField
-                inputRef={inputName}
-                className={classes.textField}
-                autoFocus
-                margin="dense"
-                id="description"
-                label="Descrição"
-                type="text"
-                fullWidth
-                variant="standard"
-                defaultValue={expense?.description}
-                error={!!errors.description}
-                helperText={errors.description ? errors.description : ''}
-                onChange={handleExpenseDescriptionChange}
-              />
+                <TextField
+                  inputRef={inputName}
+                  className={classes.textField}
+                  autoFocus
+                  margin="dense"
+                  id="description"
+                  label="Descrição"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  defaultValue={expense?.description}
+                  error={!!errors.description}
+                  helperText={errors.description ? errors.description : ''}
+                  onChange={handleExpenseDescriptionChange}
+                />
 
-              <TextField
-                className={classes.textField}
-                autoFocus
-                margin="dense"
-                id="value"
-                label="Valor"
-                type="text"
-                fullWidth
-                variant="standard"
-                defaultValue={expense?.value}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">R$</InputAdornment>,
-                }}
-                inputProps={{
-                  inputMode: 'numeric',
-                  pattern: '^[0-9]+(\\.[0-9]{1,2})?$',
-                }}
-                error={!!errors.value}
-                helperText={errors.value ? errors.value : ''}
-                onChange={handleValueChange}
-              />
+                <TextField
+                  className={classes.textField}
+                  autoFocus
+                  margin="dense"
+                  id="value"
+                  label="Valor"
+                  type="text"
+                  fullWidth
+                  variant="standard"
+                  defaultValue={expense?.value}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start">R$</InputAdornment>,
+                  }}
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '^[0-9]+(\\.[0-9]{1,2})?$',
+                  }}
+                  error={!!errors.value}
+                  helperText={errors.value ? errors.value : ''}
+                  onChange={handleValueChange}
+                />
 
-              <DateRangeDialog
-                initialBeginValue={expense?.periodBegin}
-                initialEndValue={expense?.periodEnd}
-                errorBeginDateValue={errors["beginDateValue"]}
-                errorEndDateValue={errors["endDateValue"]}
-                onDataRangeChange={handleDateRangeChange}
-              />
+                <DateRangeDialog
+                  initialBeginValue={expense?.periodBegin}
+                  initialEndValue={expense?.periodEnd}
+                  errorBeginDateValue={errors["beginDateValue"]}
+                  errorEndDateValue={errors["endDateValue"]}
+                  onDataRangeChange={handleDateRangeChange}
+                />
+              </Stack>
             </FormControl>
           </DialogContent>
           <DialogActions>
